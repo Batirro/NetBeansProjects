@@ -3,39 +3,39 @@ import java.util.*;
 
 
 public class Tour {
-    // (a) Metoda wypisująca nazwy państw wraz z ich stolicami
+    // (a) Metoda wypisuj?ca nazwy pa?stw wraz z ich stolicami
     public static void printCountriesWithCapitals() {
-        // Użycie struktury Map do definicji kolekcji
+        // U?ycie struktury Map do definicji kolekcji
         Map<String, String> countriesWithCapitals = new HashMap<>();
         
-        // Dodanie przykładowych państw i ich stolic
+        // Dodanie przyk?adowych pa?stw i ich stolic
         countriesWithCapitals.put("Polska", "Warszawa");
         countriesWithCapitals.put("Niemcy", "Berlin");
-        countriesWithCapitals.put("Francja", "Paryż");
-        countriesWithCapitals.put("Włochy", "Rzym");
+        countriesWithCapitals.put("Francja", "Pary?");
+        countriesWithCapitals.put("W?ochy", "Rzym");
         countriesWithCapitals.put("Hiszpania", "Madryt");
         countriesWithCapitals.put("Szwecja", "Sztokholm");
         
-        // Wypisanie państw i ich stolic
-        System.out.println("Państwa i ich stolice:");
+        // Wypisanie pa?stw i ich stolic
+        System.out.println("Pa?stwa i ich stolice:");
         for (Map.Entry<String, String> entry : countriesWithCapitals.entrySet()) {
             System.out.println(entry.getKey() + " - " + entry.getValue());
         }
     }
     
-    // (b) Metoda wypisująca odwiedzone miasta podczas całej trasy wycieczki
+    // (b) Metoda wypisuj?ca odwiedzone miasta podczas ca?ej trasy wycieczki
     public static void printVisitedCities() {
-        // Użycie struktury List do definicji kolekcji
+        // U?ycie struktury List do definicji kolekcji
         List<String> visitedCities = new ArrayList<>();
         
-        // Dodanie przykładowych miast (niektóre się powtarzają)
+        // Dodanie przyk?adowych miast (niekt?re si? powtarzaj?)
         visitedCities.add("Warszawa");
         visitedCities.add("Berlin");
-        visitedCities.add("Paryż");
+        visitedCities.add("Pary?");
         visitedCities.add("Rzym");
         visitedCities.add("Madryt");
-        visitedCities.add("Berlin"); // Powtórzone miasto
-        visitedCities.add("Warszawa"); // Powtórzone miasto
+        visitedCities.add("Berlin"); // Powt?rzone miasto
+        visitedCities.add("Warszawa"); // Powt?rzone miasto
         
         // Wypisanie wszystkich odwiedzonych miast
         System.out.println("\nWszystkie odwiedzone miasta:");
@@ -44,15 +44,15 @@ public class Tour {
         }
     }
     
-    // (c) Metoda wypisująca tylko unikalne nazwy miast
+    // (c) Metoda wypisuj?ca tylko unikalne nazwy miast
     public static void printUniqueCities() {
-        // Użycie struktury Set do definicji kolekcji
+        // U?ycie struktury Set do definicji kolekcji
         Set<String> uniqueCities = new HashSet<>();
         
-        // Dodanie przykładowych miast (duplikaty zostaną automatycznie usunięte)
+        // Dodanie przyk?adowych miast (duplikaty zostan? automatycznie usuni?te)
         uniqueCities.add("Warszawa");
         uniqueCities.add("Berlin");
-        uniqueCities.add("Paryż");
+        uniqueCities.add("Pary?");
         uniqueCities.add("Rzym");
         uniqueCities.add("Madryt");
         uniqueCities.add("Berlin"); // Duplikat - zostanie zignorowany
@@ -65,28 +65,28 @@ public class Tour {
         }
     }
     
-    // Sprawdzenie czy kolekcja (a) zawiera Szwecję
+    // Sprawdzenie czy kolekcja (a) zawiera Szwecj?
     public static void checkSwedenInCountries() {
         Map<String, String> countriesWithCapitals = new HashMap<>();
         countriesWithCapitals.put("Polska", "Warszawa");
         countriesWithCapitals.put("Niemcy", "Berlin");
-        countriesWithCapitals.put("Francja", "Paryż");
-        countriesWithCapitals.put("Włochy", "Rzym");
+        countriesWithCapitals.put("Francja", "Pary?");
+        countriesWithCapitals.put("W?ochy", "Rzym");
         countriesWithCapitals.put("Hiszpania", "Madryt");
         countriesWithCapitals.put("Szwecja", "Sztokholm");
         
-        System.out.println("\nCzy kolekcja (a) zawiera Szwecję: " + countriesWithCapitals.containsKey("Szwecja"));
+        System.out.println("\nCzy kolekcja (a) zawiera Szwecj?: " + countriesWithCapitals.containsKey("Szwecja"));
     }
     
-    // Sprawdzenie czy kolekcja (b) zawiera Paryż
+    // Sprawdzenie czy kolekcja (b) zawiera Pary?
     public static void checkParisInVisitedCities() {
         List<String> visitedCities = new ArrayList<>();
         visitedCities.add("Warszawa");
         visitedCities.add("Berlin");
-        visitedCities.add("Paryż");
+        visitedCities.add("Pary?");
         visitedCities.add("Rzym");
         
-        System.out.println("Czy kolekcja (b) zawiera Paryż: " + visitedCities.contains("Paryż"));
+        System.out.println("Czy kolekcja (b) zawiera Pary?: " + visitedCities.contains("Pary?"));
     }
     
     // Sprawdzenie czy kolekcja (c) zawiera Rzym
@@ -94,26 +94,26 @@ public class Tour {
         Set<String> uniqueCities = new HashSet<>();
         uniqueCities.add("Warszawa");
         uniqueCities.add("Berlin");
-        uniqueCities.add("Paryż");
+        uniqueCities.add("Pary?");
         uniqueCities.add("Rzym");
         
         System.out.println("Czy kolekcja (c) zawiera Rzym: " + uniqueCities.contains("Rzym"));
     }
     
-    // Wypisanie ilości elementów w poszczególnych kolekcjach
+    // Wypisanie ilo?ci element?w w poszczeg?lnych kolekcjach
     public static void printCollectionSizes() {
         Map<String, String> countriesWithCapitals = new HashMap<>();
         countriesWithCapitals.put("Polska", "Warszawa");
         countriesWithCapitals.put("Niemcy", "Berlin");
-        countriesWithCapitals.put("Francja", "Paryż");
-        countriesWithCapitals.put("Włochy", "Rzym");
+        countriesWithCapitals.put("Francja", "Pary?");
+        countriesWithCapitals.put("W?ochy", "Rzym");
         countriesWithCapitals.put("Hiszpania", "Madryt");
         countriesWithCapitals.put("Szwecja", "Sztokholm");
         
         List<String> visitedCities = new ArrayList<>();
         visitedCities.add("Warszawa");
         visitedCities.add("Berlin");
-        visitedCities.add("Paryż");
+        visitedCities.add("Pary?");
         visitedCities.add("Rzym");
         visitedCities.add("Madryt");
         visitedCities.add("Berlin");
@@ -122,12 +122,12 @@ public class Tour {
         Set<String> uniqueCities = new HashSet<>();
         uniqueCities.add("Warszawa");
         uniqueCities.add("Berlin");
-        uniqueCities.add("Paryż");
+        uniqueCities.add("Pary?");
         uniqueCities.add("Rzym");
         uniqueCities.add("Madryt");
         
-        System.out.println("\nLiczba elementów w kolekcji (a): " + countriesWithCapitals.size());
-        System.out.println("Liczba elementów w kolekcji (b): " + visitedCities.size());
-        System.out.println("Liczba elementów w kolekcji (c): " + uniqueCities.size());
+        System.out.println("\nLiczba element?w w kolekcji (a): " + countriesWithCapitals.size());
+        System.out.println("Liczba element?w w kolekcji (b): " + visitedCities.size());
+        System.out.println("Liczba element?w w kolekcji (c): " + uniqueCities.size());
     }
 }

@@ -1,0 +1,4 @@
+rootProject.name = 'Gradle_Project'
+include 'html-remover'
+include 'html-removing-application'
+
