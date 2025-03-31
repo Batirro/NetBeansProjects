@@ -1,0 +1,12 @@
+Kolekcja wszystkich odwiedzonych miast (mogą się powtarzać):
+Warszawa
+Berlin
+Paryż
+Berlin
+Rzym
+Madryt
+Barcelona
+Wenecja
+Rzym
+Czy kolekcja zawiera Paryż? true
+Liczba elementów kolekcji: 9

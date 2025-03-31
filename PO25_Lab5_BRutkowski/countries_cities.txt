@@ -1,0 +1,8 @@
+Kolekcja państw i ich stolic:
+Włochy - Rzym
+Hiszpania - Madryt
+Francja - Paryż
+Niemcy - Berlin
+Polska - Warszawa
+Czy kolekcja zawiera Szwecję? false
+Liczba elementów kolekcji: 5
