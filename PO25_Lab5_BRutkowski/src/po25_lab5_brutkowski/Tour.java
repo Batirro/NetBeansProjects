@@ -6,12 +6,12 @@ public class Tour {
 
     private Map<String, String> countriesCities;
     private List<String> cities;
-    private Set<String> uniqueCities;
+    private Queue<String> uniqueCities;
     
     public Tour() {
         this.countriesCities = new HashMap<>();
         this.cities = new ArrayList<>();
-        this.uniqueCities = new HashSet<>();
+        this.uniqueCities = new LinkedList<>();
         
         initializeCountriesCities();
         initializeCities();
@@ -46,8 +46,8 @@ public class Tour {
         uniqueCities.add("Madryt");
         uniqueCities.add("Barcelona");
         uniqueCities.add("Wenecja");
-        uniqueCities.add("Berlin");  // powtórzenie - będzie zignorowane
-        uniqueCities.add("Rzym");    // powtórzenie - będzie zignorowane
+        uniqueCities.add("Berlin");  // powtórzenie
+        uniqueCities.add("Rzym");    // powtórzenie
     }
     
     public Map<String, String> getCountriesCities() {
@@ -58,7 +58,7 @@ public class Tour {
         return cities;
     }
     
-    public Set<String> getUniqueCities() {
+    public Queue<String> getUniqueCities() {
         return uniqueCities;
     }
     
@@ -90,14 +90,22 @@ public class Tour {
     
     public void printUniqueCities() {
         System.out.println("Kolekcja unikalnych miast (bez powtórzeń):");
+        
+        Set<String> printedCities = new HashSet<>();
+        
         for (String city : uniqueCities) {
-            System.out.println(city);
+            if (!printedCities.contains(city)) {
+                System.out.println(city);
+                printedCities.add(city);
+            }
         }
         
         boolean containsRome = uniqueCities.contains("Rzym");
         System.out.println("Czy kolekcja zawiera Rzym? " + containsRome);
         
-        System.out.println("Liczba elementów kolekcji: " + uniqueCities.size());
+        // Liczba unikalnych elementów
+        System.out.println("Liczba unikalnych elementów kolekcji: " + printedCities.size());
+        System.out.println("Całkowita liczba elementów w kolejce: " + uniqueCities.size());
         System.out.println();
     }
 }

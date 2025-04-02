@@ -1,6 +1,12 @@
 package po25_lab4_brutkowski;
 import java.util.*;
 
+/*
+   @TODO
+ - Zmienić z statycznych funkcje na inne niestatyczne
+ - Zamienić set na kolejkę w podpunkcie c)
+*/
+
 
 public class Tour {
     public static void print_countries_cities() {

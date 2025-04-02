@@ -1,10 +1,12 @@
 Kolekcja unikalnych miast (bez powtórzeń):
-Wenecja
-Paryż
 Warszawa
-Barcelona
 Berlin
+Paryż
+Rzym
 Madryt
+Barcelona
+Wenecja
+Berlin
 Rzym
 Czy kolekcja zawiera Rzym? true
-Liczba elementów kolekcji: 7
+Liczba elementów kolekcji: 9
