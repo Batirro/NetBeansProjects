@@ -1,0 +1,38 @@
+Odpowiedzi do Zadania 5.1
+========================
+
+Pytanie 1: Jaki jest zysk za zrealizowanie zlecenia z dystansem 200 i wynagrodzeniem 10 z wykorzystaniem pociągu?
+   - Dystans: 200,0
+   - Wynagrodzenie: 10,00 (Założenie: podana wartość 10, może powinno być 10k?)
+   - Koszt pociągu (20 * S): 4000,00
+   - Zysk (Wynagrodzenie - Koszt): -3990,00
+   Odpowiedź: Zysk wynosi -3990,00 (strata).
+
+Pytanie 2: Firma ma do wyboru dwa zlecenia na transport samolotem:
+   - Zlecenie A: dystans 50, wynagrodzenie 50 (Założenie: 50k)
+     - Dystans: 50,0
+     - Wynagrodzenie: 50000,00
+     - Koszt samolotu (100 * S^2): 250000,00
+     - Zysk A: -200000,00 (strata)
+   - Zlecenie B: dystans 30, wynagrodzenie 40 (Założenie: 40k)
+     - Dystans: 30,0
+     - Wynagrodzenie: 40000,00
+     - Koszt samolotu (100 * S^2): 90000,00
+     - Zysk B: -50000,00 (strata)
+
+   Które z tych zleceń da większy zysk (mniejszą stratę)?
+   Odpowiedź: Zlecenie B (Zysk: -50000,00) da większy zysk niż Zlecenie A (Zysk: -200000,00).
+   (Uwaga: Przy przyjętych założeniach wynagrodzeń (50k, 40k) oba zlecenia samolotowe generują stratę.)
+
+Pytanie 3: Który środek transportu da większe zyski dla zlecenia z dystansem 350 i wynagrodzeniem 45 (Założenie: 45k)?
+   - Dystans: 350,0
+   - Wynagrodzenie: 45000,00
+
+   - Opcja Samolot:
+     - Koszt (100 * S^2): 12250000,00
+     - Zysk: -12205000,00 (strata)
+   - Opcja Pociąg:
+     - Koszt (20 * S): 7000,00
+     - Zysk: 38000,00 
+
+   Odpowiedź: Większy zysk da Pociąg (Zysk: 38000,00 vs -12205000,00 dla samolotu).
