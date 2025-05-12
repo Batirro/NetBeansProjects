@@ -7,17 +7,17 @@ public class Tour {
     private Map<String, String> countriesCities;
     private List<String> cities;
     private Queue<String> uniqueCities;
-    
+
     public Tour() {
         this.countriesCities = new HashMap<>();
         this.cities = new ArrayList<>();
         this.uniqueCities = new LinkedList<>();
-        
+
         initializeCountriesCities();
         initializeCities();
         initializeUniqueCities();
     }
-    
+
     private void initializeCountriesCities() {
         countriesCities.put("Polska", "Warszawa");
         countriesCities.put("Niemcy", "Berlin");
@@ -25,7 +25,7 @@ public class Tour {
         countriesCities.put("Włochy", "Rzym");
         countriesCities.put("Hiszpania", "Madryt");
     }
-    
+
     private void initializeCities() {
         cities.add("Warszawa");
         cities.add("Berlin");
@@ -37,7 +37,7 @@ public class Tour {
         cities.add("Wenecja");
         cities.add("Rzym");    // powtórzenie
     }
-    
+
     private void initializeUniqueCities() {
         uniqueCities.add("Warszawa");
         uniqueCities.add("Berlin");
@@ -49,48 +49,48 @@ public class Tour {
         uniqueCities.add("Berlin");  // powtórzenie
         uniqueCities.add("Rzym");    // powtórzenie
     }
-    
+
     public Map<String, String> getCountriesCities() {
         return countriesCities;
     }
-    
+
     public List<String> getCities() {
         return cities;
     }
-    
+
     public Queue<String> getUniqueCities() {
         return uniqueCities;
     }
-    
+
     public void printCountriesCities() {
         System.out.println("Kolekcja państw i ich stolic:");
         for (Map.Entry<String, String> entry : countriesCities.entrySet()) {
             System.out.println(entry.getKey() + " - " + entry.getValue());
         }
-        
+
         boolean containsSweden = countriesCities.containsKey("Szwecja");
         System.out.println("Czy kolekcja zawiera Szwecję? " + containsSweden);
-        
+
         System.out.println("Liczba elementów kolekcji: " + countriesCities.size());
         System.out.println();
     }
-    
+
     public void printCities() {
         System.out.println("Kolekcja wszystkich odwiedzonych miast (mogą się powtarzać):");
         for (String city : cities) {
             System.out.println(city);
         }
-        
+
         boolean containsParis = cities.contains("Paryż");
         System.out.println("Czy kolekcja zawiera Paryż? " + containsParis);
-        
+
         System.out.println("Liczba elementów kolekcji: " + cities.size());
         System.out.println();
     }
-    
+
     public void printUniqueCities() {
         System.out.println("Kolekcja unikalnych miast (bez powtórzeń):");
-        
+
         Set<String> printedCities = new HashSet<>();
         // Usuwanie powtórzeń
         for (String city : uniqueCities) {
@@ -99,10 +99,10 @@ public class Tour {
                 printedCities.add(city);
             }
         }
-        
+
         boolean containsRome = uniqueCities.contains("Rzym");
         System.out.println("Czy kolekcja zawiera Rzym? " + containsRome);
-        
+
         System.out.println("Liczba unikalnych elementów kolekcji: " + printedCities.size());
         System.out.println("Całkowita liczba elementów w kolejce: " + uniqueCities.size());
         System.out.println();

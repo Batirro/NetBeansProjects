@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="test" default="all">
+  
+  
+  <property file="test.properties"/>
+  <!-- Uncomment the following property if no tests compilation is needed -->
+  <!-- 
+  <property name="skip.tests" value="true"/>
+   -->
+  
+  <!-- Compiler options -->
+  
+  <property name="compiler.debug" value="on"/>
+  <property name="compiler.generate.no.warnings" value="off"/>
+  <property name="compiler.args" value=""/>
+  <property name="compiler.max.memory" value="700m"/>
+  <patternset id="ignored.files">
+    <exclude name="**/*.pyc/**"/>
+    <exclude name="**/*.pyo/**"/>
+    <exclude name="**/*.rbc/**"/>
+    <exclude name="**/*.yarb/**"/>
+    <exclude name="**/*~/**"/>
+    <exclude name="**/.DS_Store/**"/>
+    <exclude name="**/.git/**"/>
+    <exclude name="**/.hg/**"/>
+    <exclude name="**/.mypy_cache/**"/>
+    <exclude name="**/.pytest_cache/**"/>
+    <exclude name="**/.ruff_cache/**"/>
+    <exclude name="**/.svn/**"/>
+    <exclude name="**/CVS/**"/>
+    <exclude name="**/__pycache__/**"/>
+    <exclude name="**/_svn/**"/>
+    <exclude name="**/vssver.scc/**"/>
+    <exclude name="**/vssver2.scc/**"/>
+  </patternset>
+  <patternset id="library.patterns">
+    <include name="*.egg"/>
+    <include name="*.klib"/>
+    <include name="*.jar"/>
+    <include name="*.apk"/>
+    <include name="*.swc"/>
+    <include name="*.war"/>
+    <include name="*.zip"/>
+    <include name="*.ear"/>
+    <include name="*.ane"/>
+  </patternset>
+  <patternset id="compiler.resources">
+    <exclude name="**/?*.java"/>
+    <exclude name="**/?*.form"/>
+    <exclude name="**/?*.class"/>
+    <exclude name="**/?*.groovy"/>
+    <exclude name="**/?*.scala"/>
+    <exclude name="**/?*.flex"/>
+    <exclude name="**/?*.kt"/>
+    <exclude name="**/?*.clj"/>
+    <exclude name="**/?*.aj"/>
+  </patternset>
+  
+  <!-- JDK definitions -->
+  
+  <property name="jdk.bin.graalvm-jdk-23" value="${jdk.home.graalvm-jdk-23}/bin"/>
+  <path id="jdk.classpath.graalvm-jdk-23">
+    <fileset dir="${jdk.home.graalvm-jdk-23}">
+      <include name="../graalvm-jdk-23.0.2!/com.oracle.graal.graal_enterprise"/>
+      <include name="../graalvm-jdk-23.0.2!/com.oracle.svm.enterprise.truffle"/>
+      <include name="../graalvm-jdk-23.0.2!/com.oracle.svm.extraimage_enterprise"/>
+      <include name="../graalvm-jdk-23.0.2!/java.base"/>
+      <include name="../graalvm-jdk-23.0.2!/java.compiler"/>
+      <include name="../graalvm-jdk-23.0.2!/java.datatransfer"/>
+      <include name="../graalvm-jdk-23.0.2!/java.desktop"/>
+      <include name="../graalvm-jdk-23.0.2!/java.instrument"/>
+      <include name="../graalvm-jdk-23.0.2!/java.logging"/>
+      <include name="../graalvm-jdk-23.0.2!/java.management"/>
+      <include name="../graalvm-jdk-23.0.2!/java.management.rmi"/>
+      <include name="../graalvm-jdk-23.0.2!/java.naming"/>
+      <include name="../graalvm-jdk-23.0.2!/java.net.http"/>
+      <include name="../graalvm-jdk-23.0.2!/java.prefs"/>
+      <include name="../graalvm-jdk-23.0.2!/java.rmi"/>
+      <include name="../graalvm-jdk-23.0.2!/java.scripting"/>
+      <include name="../graalvm-jdk-23.0.2!/java.se"/>
+      <include name="../graalvm-jdk-23.0.2!/java.security.jgss"/>
+      <include name="../graalvm-jdk-23.0.2!/java.security.sasl"/>
+      <include name="../graalvm-jdk-23.0.2!/java.smartcardio"/>
+      <include name="../graalvm-jdk-23.0.2!/java.sql"/>
+      <include name="../graalvm-jdk-23.0.2!/java.sql.rowset"/>
+      <include name="../graalvm-jdk-23.0.2!/java.transaction.xa"/>
+      <include name="../graalvm-jdk-23.0.2!/java.xml"/>
+      <include name="../graalvm-jdk-23.0.2!/java.xml.crypto"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.accessibility"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.attach"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.charsets"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.compiler"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.crypto.cryptoki"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.crypto.ec"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.crypto.mscapi"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.dynalink"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.editpad"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.graal.compiler"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.graal.compiler.management"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.hotspot.agent"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.httpserver"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.incubator.vector"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.internal.ed"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.internal.jvmstat"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.internal.le"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.internal.md"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.internal.opt"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.internal.vm.ci"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.jartool"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.javadoc"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.jcmd"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.jconsole"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.jdeps"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.jdi"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.jdwp.agent"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.jfr"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.jlink"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.jpackage"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.jshell"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.jsobject"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.jstatd"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.localedata"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.management"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.management.agent"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.management.jfr"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.naming.dns"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.naming.rmi"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.net"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.nio.mapmode"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.sctp"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.security.auth"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.security.jgss"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.unsupported"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.unsupported.desktop"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.xml.dom"/>
+      <include name="../graalvm-jdk-23.0.2!/jdk.zipfs"/>
+      <include name="../graalvm-jdk-23.0.2!/org.graalvm.collections"/>
+      <include name="../graalvm-jdk-23.0.2!/org.graalvm.extraimage.builder"/>
+      <include name="../graalvm-jdk-23.0.2!/org.graalvm.extraimage.librarysupport"/>
+      <include name="../graalvm-jdk-23.0.2!/org.graalvm.nativeimage"/>
+      <include name="../graalvm-jdk-23.0.2!/org.graalvm.nativeimage.llvm"/>
+      <include name="../graalvm-jdk-23.0.2!/org.graalvm.truffle.compiler"/>
+      <include name="../graalvm-jdk-23.0.2!/org.graalvm.word"/>
+    </fileset>
+  </path>
+  
+  <property name="project.jdk.home" value="${jdk.home.graalvm-jdk-23}"/>
+  <property name="project.jdk.bin" value="${jdk.bin.graalvm-jdk-23}"/>
+  <property name="project.jdk.classpath" value="jdk.classpath.graalvm-jdk-23"/>
+  <!-- Register Custom Compiler Taskdefs -->
+  <property name="javac2.home" value="${idea.home}/lib"/>
+  <path id="javac2.classpath">
+    <fileset dir="${javac2.home}">
+      <include name="jdom.jar"/>
+      <include name="asm-all*.jar"/>
+      <include name="forms-*.jar"/>
+      <include name="forms_rt.jar"/>
+    </fileset>
+    <fileset dir="${idea.home}/plugins/java/lib">
+      <include name="javac2.jar"/>
+    </fileset>
+  </path>
+  <target name="register.custom.compilers">
+    <taskdef name="javac2" classname="com.intellij.ant.Javac2" classpathref="javac2.classpath"/>
+    <taskdef name="instrumentIdeaExtensions" classname="com.intellij.ant.InstrumentIdeaExtensions" classpathref="javac2.classpath"/>
+  </target>
+  
+  <!-- Modules -->
+  
+  <import file="${basedir}/module_test.xml"/>
+  
+  <target name="init" description="Build initialization">
+    <!-- Perform any build initialization in this target -->
+  </target>
+  
+  <target name="clean" depends="clean.module.test" description="cleanup all"/>
+  
+  <target name="build.modules" depends="init, clean, compile.module.test" description="build all modules"/>
+  
+  <target name="all" depends="build.modules" description="build all"/>
+</project>
