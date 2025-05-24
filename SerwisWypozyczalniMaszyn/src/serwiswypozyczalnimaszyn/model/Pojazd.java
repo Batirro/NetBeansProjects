@@ -1,86 +1,130 @@
 package serwiswypozyczalnimaszyn.model;
 
-/**
- * Klasa abstrakcyjna Pojazd.
- * Jest to bazowa klasa dla wszystkich pojazdów w wypożyczalni.
- * Definiuje wspólne cechy i zachowania pojazdów.
- */
-public abstract class Pojazd {
+import java.io.Serializable;
 
-    // Pola przechowujące podstawowe informacje o pojeździe
-    private int id; // Unikalny identyfikator pojazdu
-    private String nazwaModelu; // Nazwa modelu pojazdu, np. "CAT 320D"
-    private int rokProdukcji; // Rok produkcji pojazdu
-    private boolean dostepny; // Status dostępności pojazdu (true - dostępny, false - wypożyczony)
+/**
+ * Abstrakcyjna klasa bazowa reprezentująca ogólny pojazd w systemie wypożyczalni.
+ * Implementuje interfejs Serializable, aby umożliwić zapis i odczyt obiektów tej klasy.
+ */
+public abstract class Pojazd implements Serializable {
+    private static final long serialVersionUID = 1L; // Wersja serializacji dla kompatybilności
+
+    private String marka; // Marka pojazdu
+    private String model; // Model pojazdu
+    private String numerRejestracyjny; // Numer rejestracyjny pojazdu
+    private double cenaZaDobe; // Cena wynajmu pojazdu za dobę
+    private boolean czyDostepny; // Status dostępności pojazdu
 
     /**
      * Konstruktor klasy Pojazd.
-     * Używany przez klasy dziedziczące do inicjalizacji wspólnych pól.
      *
-     * @param id Unikalny identyfikator pojazdu.
-     * @param nazwaModelu Nazwa modelu pojazdu.
-     * @param rokProdukcji Rok produkcji pojazdu.
+     * @param marka Marka pojazdu.
+     * @param model Model pojazdu.
+     * @param numerRejestracyjny Numer rejestracyjny pojazdu.
+     * @param cenaZaDobe Cena wynajmu pojazdu za dobę.
      */
-    public Pojazd(int id, String nazwaModelu, int rokProdukcji) {
-        this.id = id;
-        this.nazwaModelu = nazwaModelu;
-        this.rokProdukcji = rokProdukcji;
-        this.dostepny = true; // Domyślnie każdy nowy pojazd jest dostępny
-    }
-
-    // Gettery i Settery dla pól klasy
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getNazwaModelu() {
-        return nazwaModelu;
-    }
-
-    public void setNazwaModelu(String nazwaModelu) {
-        this.nazwaModelu = nazwaModelu;
-    }
-
-    public int getRokProdukcji() {
-        return rokProdukcji;
-    }
-
-    public void setRokProdukcji(int rokProdukcji) {
-        this.rokProdukcji = rokProdukcji;
-    }
-
-    public boolean isDostepny() {
-        return dostepny;
-    }
-
-    public void setDostepny(boolean dostepny) {
-        this.dostepny = dostepny;
+    public Pojazd(String marka, String model, String numerRejestracyjny, double cenaZaDobe) {
+        this.marka = marka;
+        this.model = model;
+        this.numerRejestracyjny = numerRejestracyjny;
+        this.cenaZaDobe = cenaZaDobe;
+        this.czyDostepny = true; // Domyślnie nowy pojazd jest dostępny
     }
 
     /**
-     * Metoda abstrakcyjna do wyświetlania szczegółowych informacji o pojeździe.
-     * Każda konkretna klasa pojazdu (Koparka, Wywrotka, Dzwig) musi ją zaimplementować.
-     *
-     * @return String zawierający sformatowane szczegóły pojazdu.
+     * Zwraca markę pojazdu.
+     * @return Marka pojazdu.
      */
-    public abstract String wyswietlSzczegoly();
+    public String getMarka() {
+        return marka;
+    }
+
     /**
-     * Metoda abstrakcyjna do pobierania dziennej stawki za wypożyczenie pojazdu.
+     * Ustawia markę pojazdu.
+     * @param marka Nowa marka pojazdu.
+     */
+    public void setMarka(String marka) {
+        this.marka = marka;
+    }
+
+    /**
+     * Zwraca model pojazdu.
+     * @return Model pojazdu.
+     */
+    public String getModel() {
+        return model;
+    }
+
+    /**
+     * Ustawia model pojazdu.
+     * @param model Nowy model pojazdu.
+     */
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    /**
+     * Zwraca numer rejestracyjny pojazdu.
+     * @return Numer rejestracyjny pojazdu.
+     */
+    public String getNumerRejestracyjny() {
+        return numerRejestracyjny;
+    }
+
+    /**
+     * Ustawia numer rejestracyjny pojazdu.
+     * @param numerRejestracyjny Nowy numer rejestracyjny pojazdu.
+     */
+    public void setNumerRejestracyjny(String numerRejestracyjny) {
+        this.numerRejestracyjny = numerRejestracyjny;
+    }
+
+    /**
+     * Zwraca cenę wynajmu pojazdu za dobę.
+     * @return Cena za dobę.
+     */
+    public double getCenaZaDobe() {
+        return cenaZaDobe;
+    }
+
+    /**
+     * Ustawia cenę wynajmu pojazdu za dobę.
+     * @param cenaZaDobe Nowa cena za dobę.
+     */
+    public void setCenaZaDobe(double cenaZaDobe) {
+        this.cenaZaDobe = cenaZaDobe;
+    }
+
+    /**
+     * Sprawdza, czy pojazd jest dostępny.
+     * @return true, jeśli pojazd jest dostępny, w przeciwnym razie false.
+     */
+    public boolean isCzyDostepny() {
+        return czyDostepny;
+    }
+
+    /**
+     * Ustawia status dostępności pojazdu.
+     * @param czyDostepny true, jeśli pojazd ma być dostępny, false w przeciwnym razie.
+     */
+    public void setCzyDostepny(boolean czyDostepny) {
+        this.czyDostepny = czyDostepny;
+    }
+
+    /**
+     * Abstrakcyjna metoda zwracająca typ pojazdu.
      * Każda konkretna klasa pojazdu musi zaimplementować tę metodę.
-     * @return Dzienna stawka za wypożyczenie (np. w PLN).
+     * @return Typ pojazdu jako String.
      */
-    public abstract double getDziennaStawka();
+    public abstract String getTyp();
+
+    /**
+     * Zwraca reprezentację tekstową obiektu Pojazd.
+     * Przydatne do wyświetlania informacji o pojeździe, np. w listach.
+     * @return String zawierający markę, model i numer rejestracyjny pojazdu.
+     */
     @Override
     public String toString() {
-        // Możemy dodać stawkę do toString dla łatwiejszego debugowania, ale nie jest to konieczne dla GUI
-        return "ID: " + id + ", Model: " + nazwaModelu + ", Rok: " + rokProdukcji +
-                ", Dostępny: " + (dostepny ? "Tak" : "Nie") +
-                ", Stawka/dzień: " + String.format("%.2f", getDziennaStawka()) + " PLN"; // Używamy getDziennaStawka()
+        return marka + " " + model + " (" + numerRejestracyjny + ")";
     }
-
 }

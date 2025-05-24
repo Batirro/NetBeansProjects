@@ -1,106 +1,187 @@
 package serwiswypozyczalnimaszyn.model;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-public class Wypozyczenie {
-    private int id;
-    private Klient klient;
-    private Pojazd pojazd;
-    private LocalDate dataRozpoczecia;
-    private LocalDate planowanaDataZakonczenia; // Nowe pole
-    private LocalDate faktycznaDataZakonczenia; // Zmieniona nazwa z dataZakonczenia
-    private boolean aktywne;
-    private double kosztCalkowity;
+/**
+ * Klasa reprezentująca pojedyncze wypożyczenie pojazdu przez klienta (firmę).
+ * Implementuje interfejs Serializable, aby umożliwić zapis i odczyt obiektów tej klasy.
+ * Zawiera teraz również planowaną datę zwrotu.
+ */
+public class Wypozyczenie implements Serializable {
+    private static final long serialVersionUID = 3L; // Zmieniona wersja serializacji
 
-    private static final DateTimeFormatter FORMATTER_DATY = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    private Klient klient; // Klient (firma), który wypożyczył pojazd
+    private Pojazd pojazd; // Wypożyczony pojazd
+    private Date dataWypozyczenia; // Data rozpoczęcia wypożyczenia
+    private Date planowanaDataZwrotu; // Planowana data zwrotu pojazdu
+    private Date dataZwrotu; // Rzeczywista data zakończenia/zwrotu wypożyczenia (może być null)
+    private double kosztCalkowity; // Całkowity koszt wypożyczenia
+
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
 
     /**
      * Konstruktor klasy Wypozyczenie.
      *
-     * @param id Unikalny identyfikator wypożyczenia.
-     * @param klient Klient dokonujący wypożyczenia.
+     * @param klient Klient (firma) dokonujący wypożyczenia.
      * @param pojazd Wypożyczany pojazd.
-     * @param dataRozpoczecia Data rozpoczęcia wypożyczenia.
-     * @param planowanaDataZakonczenia Planowana data zwrotu pojazdu.
+     * @param dataWypozyczenia Data rozpoczęcia wypożyczenia.
+     * @param planowanaDataZwrotu Planowana data zwrotu pojazdu.
      */
-    public Wypozyczenie(int id, Klient klient, Pojazd pojazd, LocalDate dataRozpoczecia, LocalDate planowanaDataZakonczenia) {
-        this.id = id;
+    public Wypozyczenie(Klient klient, Pojazd pojazd, Date dataWypozyczenia, Date planowanaDataZwrotu) {
         this.klient = klient;
         this.pojazd = pojazd;
-        this.dataRozpoczecia = dataRozpoczecia;
-        this.planowanaDataZakonczenia = planowanaDataZakonczenia; // Ustawienie planowanej daty
-        this.faktycznaDataZakonczenia = null; // Faktyczna data jest null na początku
-        this.aktywne = true;
-        this.kosztCalkowity = 0.0;
+        this.dataWypozyczenia = dataWypozyczenia;
+        this.planowanaDataZwrotu = planowanaDataZwrotu;
+        this.dataZwrotu = null; // Początkowo data zwrotu jest nieustawiona
+        this.kosztCalkowity = 0; // Początkowo koszt jest zerowy, obliczany przy zwrocie
     }
 
-    // Gettery i Settery
-    public int getId() { return id; }
-    public Klient getKlient() { return klient; }
-    public Pojazd getPojazd() { return pojazd; }
-    public LocalDate getDataRozpoczecia() { return dataRozpoczecia; }
-    public LocalDate getPlanowanaDataZakonczenia() { return planowanaDataZakonczenia; } // Getter dla planowanej daty
-    public LocalDate getFaktycznaDataZakonczenia() { return faktycznaDataZakonczenia; } // Getter dla faktycznej daty
-    public boolean isAktywne() { return aktywne; }
-    public double getKosztCalkowity() { return kosztCalkowity; }
+    /**
+     * Zwraca klienta (firmę), który wypożyczył pojazd.
+     * @return Obiekt Klient.
+     */
+    public Klient getKlient() {
+        return klient;
+    }
 
-    public void setPlanowanaDataZakonczenia(LocalDate planowanaDataZakonczenia) {
-        // Możliwość zmiany planowanej daty, jeśli wypożyczenie jest aktywne
-        if (this.aktywne) {
-            this.planowanaDataZakonczenia = planowanaDataZakonczenia;
-        }
+    /**
+     * Ustawia klienta (firmę) dla wypożyczenia.
+     * @param klient Nowy klient (firma).
+     */
+    public void setKlient(Klient klient) {
+        this.klient = klient;
+    }
+
+    /**
+     * Zwraca wypożyczony pojazd.
+     * @return Obiekt Pojazd.
+     */
+    public Pojazd getPojazd() {
+        return pojazd;
+    }
+
+    /**
+     * Ustawia pojazd dla wypożyczenia.
+     * @param pojazd Nowy pojazd.
+     */
+    public void setPojazd(Pojazd pojazd) {
+        this.pojazd = pojazd;
+    }
+
+    /**
+     * Zwraca datę rozpoczęcia wypożyczenia.
+     * @return Data wypożyczenia.
+     */
+    public Date getDataWypozyczenia() {
+        return dataWypozyczenia;
+    }
+
+    /**
+     * Ustawia datę rozpoczęcia wypożyczenia.
+     * @param dataWypozyczenia Nowa data wypożyczenia.
+     */
+    public void setDataWypozyczenia(Date dataWypozyczenia) {
+        this.dataWypozyczenia = dataWypozyczenia;
+    }
+
+    /**
+     * Zwraca planowaną datę zwrotu pojazdu.
+     * @return Planowana data zwrotu.
+     */
+    public Date getPlanowanaDataZwrotu() {
+        return planowanaDataZwrotu;
+    }
+
+    /**
+     * Ustawia planowaną datę zwrotu pojazdu.
+     * @param planowanaDataZwrotu Nowa planowana data zwrotu.
+     */
+    public void setPlanowanaDataZwrotu(Date planowanaDataZwrotu) {
+        this.planowanaDataZwrotu = planowanaDataZwrotu;
     }
 
 
     /**
-     * Kończy wypożyczenie ustawiając faktyczną datę zwrotu i oblicza jego koszt.
-     * @param faktycznaDataZwrotu Data faktycznego zwrotu pojazdu.
+     * Zwraca rzeczywistą datę zwrotu pojazdu.
+     * @return Data zwrotu lub null, jeśli pojazd nie został zwrócony.
      */
-    public void zakonczWypozyczenie(LocalDate faktycznaDataZwrotu) {
-        if (this.aktywne) {
-            this.faktycznaDataZakonczenia = faktycznaDataZwrotu;
-            this.aktywne = false;
-            obliczKosztWypozyczenia();
-        }
+    public Date getDataZwrotu() {
+        return dataZwrotu;
     }
 
     /**
-     * Oblicza koszt całkowity wypożyczenia na podstawie liczby dni między datą rozpoczęcia
-     * a faktyczną datą zakończenia oraz dziennej stawki pojazdu.
-     * Minimalny okres wypożyczenia to 1 dzień.
+     * Ustawia rzeczywistą datę zwrotu pojazdu.
+     * @param dataZwrotu Data zwrotu pojazdu.
      */
-    private void obliczKosztWypozyczenia() {
-        if (pojazd != null && faktycznaDataZakonczenia != null && dataRozpoczecia != null) {
-            if (faktycznaDataZakonczenia.isBefore(dataRozpoczecia)) {
-                this.kosztCalkowity = 0.0;
-                System.err.println("Błąd: Faktyczna data zakończenia wcześniejsza niż data rozpoczęcia dla wypożyczenia ID: " + id);
-                return;
-            }
-            long liczbaDni = ChronoUnit.DAYS.between(dataRozpoczecia, faktycznaDataZakonczenia) + 1;
-            if (liczbaDni <= 0) {
-                liczbaDni = 1;
-            }
-            this.kosztCalkowity = liczbaDni * pojazd.getDziennaStawka();
-        } else {
-            this.kosztCalkowity = 0.0;
-        }
+    public void setDataZwrotu(Date dataZwrotu) {
+        this.dataZwrotu = dataZwrotu;
     }
 
+    /**
+     * Zwraca całkowity koszt wypożyczenia.
+     * @return Koszt całkowity.
+     */
+    public double getKosztCalkowity() {
+        return kosztCalkowity;
+    }
+
+    /**
+     * Ustawia całkowity koszt wypożyczenia.
+     * @param kosztCalkowity Nowy koszt całkowity.
+     */
+    public void setKosztCalkowity(double kosztCalkowity) {
+        this.kosztCalkowity = kosztCalkowity;
+    }
+
+    /**
+     * Oblicza koszt wypożyczenia na podstawie RZECZYWISTEJ daty zwrotu i ceny za dobę pojazdu.
+     * Jeśli data zwrotu nie jest ustawiona, koszt pozostaje 0 lub taki jak był.
+     * Koszt jest obliczany jako liczba dni (zaokrąglona w górę) pomnożona przez cenę za dobę.
+     */
+    public void obliczKoszt() {
+        if (dataZwrotu != null && dataWypozyczenia != null && pojazd != null) {
+            if (dataZwrotu.before(dataWypozyczenia)) {
+                // Koszt nie powinien być ujemny, można ustawić na 0 lub koszt minimalny
+                // Dla uproszczenia, jeśli data zwrotu jest błędna, nie obliczamy.
+                System.err.println("Data zwrotu nie może być wcześniejsza niż data wypożyczenia przy obliczaniu kosztu.");
+                return; // Nie zmieniaj kosztu, jeśli daty są nieprawidłowe
+            }
+            long diffInMillis = dataZwrotu.getTime() - dataWypozyczenia.getTime();
+            long diffInDays = (diffInMillis / (1000 * 60 * 60 * 24));
+            if (diffInMillis % (1000 * 60 * 60 * 24) > 0 || diffInDays == 0) {
+                diffInDays++;
+            }
+            this.kosztCalkowity = diffInDays * pojazd.getCenaZaDobe();
+        }
+        // Jeśli dataZwrotu jest null, koszt nie jest (re)kalkulowany tutaj.
+        // Koszt jest finalizowany tylko po faktycznym zwrocie.
+    }
+
+    /**
+     * Zwraca reprezentację tekstową obiektu Wypozyczenie.
+     * Używa nazwy firmy i NIP klienta. Pokazuje planowaną datę zwrotu, jeśli rzeczywista nie jest ustawiona.
+     * @return String opisujący wypożyczenie.
+     */
     @Override
     public String toString() {
-        String planowanaDataZakonStr = (planowanaDataZakonczenia == null) ? "N/A" : planowanaDataZakonczenia.format(FORMATTER_DATY);
-        String faktycznaDataZakonStr = (faktycznaDataZakonczenia == null) ? "N/A" : faktycznaDataZakonczenia.format(FORMATTER_DATY);
-        String kosztStr = (kosztCalkowity > 0 || !aktywne) ? String.format("%.2f PLN", kosztCalkowity) : "N/A (aktywne)";
+        String dataWypStr = dataWypozyczenia != null ? DATE_FORMAT.format(dataWypozyczenia) : "BRAK DATY";
+        String dataZwrPlanStr = planowanaDataZwrotu != null ? DATE_FORMAT.format(planowanaDataZwrotu) : "NIEZNANA";
+        String statusZwrotu;
 
-        return "ID Wypożyczenia: " + id +
-                ", Klient: [" + klient.getNazwaFirmy() + "]" +
-                ", Pojazd: [" + pojazd.getNazwaModelu() + "]" +
-                ", Od: " + dataRozpoczecia.format(FORMATTER_DATY) +
-                ", Plan. Do: " + planowanaDataZakonStr + // Dodano planowaną datę
-                ", Fakt. Do: " + faktycznaDataZakonStr + // Zmieniono etykietę
-                ", Status: " + (aktywne ? "Aktywne" : "Zakończone") +
-                ", Koszt: " + kosztStr;
+        if (dataZwrotu != null) {
+            statusZwrotu = ", Zwrócono: " + DATE_FORMAT.format(dataZwrotu);
+        } else {
+            statusZwrotu = ", Plan. zwrot: " + dataZwrPlanStr + " (W TRAKCIE)";
+        }
+
+        String klientInfo = klient != null ? klient.getNazwaFirmy() + " (NIP: " + klient.getNip() + ")" : "BRAK KLIENTA";
+        String pojazdInfo = pojazd != null ? pojazd.getMarka() + " " + pojazd.getModel() : "BRAK POJAZDU";
+
+        return "Klient: " + klientInfo +
+               ", Pojazd: " + pojazdInfo +
+               ", Od: " + dataWypStr +
+               statusZwrotu;
     }
 }

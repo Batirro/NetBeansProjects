@@ -1,281 +1,574 @@
 package serwiswypozyczalnimaszyn.gui;
 
 import serwiswypozyczalnimaszyn.logika.ZarzadzanieWypozyczalnia;
-import serwiswypozyczalnimaszyn.model.Koparka;
-import serwiswypozyczalnimaszyn.model.Pojazd;
-import serwiswypozyczalnimaszyn.model.Wywrotka;
-import serwiswypozyczalnimaszyn.model.Dzwig;
+import serwiswypozyczalnimaszyn.model.*;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+/**
+ * Panel GUI do zarządzania pojazdami.
+ * Umożliwia dodawanie, edycję i usuwanie pojazdów różnych typów
+ * wraz z ich specyficznymi atrybutami.
+ * Wyświetla listę pojazdów.
+ */
 public class PanelPojazdy extends JPanel {
 
-    private ZarzadzanieWypozyczalnia zarzadzanie;
-    private JFrame parentFrame;
-    private JTable tabelaPojazdow;
-    private DefaultTableModel modelTabeli;
+    private ZarzadzanieWypozyczalnia zarzadzanie; // Referencja do logiki aplikacji
+    private JList<Pojazd> listaPojazdow; // Lista wyświetlająca pojazdy
+    private DefaultListModel<Pojazd> modelListyPojazdow; // Model dla JList
 
-    public PanelPojazdy(ZarzadzanieWypozyczalnia zarzadzanie, JFrame parentFrame) {
+    // Pola formularza ogólne
+    private JComboBox<String> typPojazduComboBox;
+    private JTextField markaField;
+    private JTextField modelField;
+    private JTextField numerRejestracyjnyField;
+    private JTextField cenaZaDobeField;
+
+    // Pola i etykiety dla atrybutów specyficznych - teraz będzie ich więcej
+    // Zamiast jednego 'atrybutSpecyficznyField', stworzymy dedykowane pola dla każdego typu.
+    // Aby uprościć zarządzanie widocznością, zgrupujemy je w panelach.
+
+    // Panel dla atrybutów Koparki
+    private JPanel panelAtrybutowKoparki;
+    private JTextField koparkaGlebokoscField;
+    private JTextField koparkaPojemnoscLyzeczkiField;
+    private JTextField koparkaZasiegRamieniaField;
+
+    // Panel dla atrybutów Dźwigu
+    private JPanel panelAtrybutowDzwigu;
+    private JTextField dzwigUdzwigField;
+    private JTextField dzwigDlugoscWysiegnikaField;
+    private JTextField dzwigWysokoscPodnoszeniaField;
+
+    // Panel dla atrybutów Wywrotki
+    private JPanel panelAtrybutowWywrotki;
+    private JTextField wywrotkaLadownoscField;
+    private JTextField wywrotkaTypNapeduField;
+    private JTextField wywrotkaPojemnoscSkrzyniField;
+
+    private JPanel panelAtrybutowSpecyficznychHolder; // Kontener na panele atrybutów
+
+    // Przyciski
+    private JButton dodajButton;
+    private JButton edytujButton;
+    private JButton usunButton;
+    private JButton wyczyscPolaButton;
+
+    private Pojazd aktualnieWybranyPojazd = null; // Aktualnie wybrany pojazd z listy
+
+    /**
+     * Konstruktor Panelu Pojazdów.
+     * @param zarzadzanie Referencja do obiektu zarządzającego logiką wypożyczalni.
+     */
+    public PanelPojazdy(ZarzadzanieWypozyczalnia zarzadzanie) {
         this.zarzadzanie = zarzadzanie;
-        this.parentFrame = parentFrame;
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(10, 10));
+        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
         initComponents();
-        odswiezTabelePojazdow();
+        zaladujPojazdy();
+        aktualizujWidocznoscPaneliAtrybutow(); // Ustawienie widoczności na starcie
     }
 
+    /**
+     * Inicjalizuje i rozmieszcza komponenty GUI na panelu.
+     */
     private void initComponents() {
-        String[] nazwyKolumn = {"ID", "Model", "Rok", "Dostępny", "Typ Pojazdu", "Stawka/dzień (PLN)"};
-        modelTabeli = new DefaultTableModel(nazwyKolumn, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) { return false; }
-        };
-        tabelaPojazdow = new JTable(modelTabeli);
-        tabelaPojazdow.getColumnModel().getColumn(0).setPreferredWidth(30);
-        tabelaPojazdow.getColumnModel().getColumn(1).setPreferredWidth(150);
-        tabelaPojazdow.getColumnModel().getColumn(2).setPreferredWidth(50);
-        tabelaPojazdow.getColumnModel().getColumn(3).setPreferredWidth(70);
-        tabelaPojazdow.getColumnModel().getColumn(4).setPreferredWidth(100);
-        tabelaPojazdow.getColumnModel().getColumn(5).setPreferredWidth(120);
-
-        add(new JScrollPane(tabelaPojazdow), BorderLayout.CENTER);
-
-        JPanel panelPrzyciskow = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton btnDodaj = new JButton("Dodaj Pojazd");
-        btnDodaj.addActionListener(e -> dodajPojazdDialog());
-        panelPrzyciskow.add(btnDodaj);
-
-        JButton btnUsun = new JButton("Usuń Zaznaczony");
-        btnUsun.addActionListener(e -> usunZaznaczonyPojazd());
-        panelPrzyciskow.add(btnUsun);
-
-        JButton btnPokazCechy = new JButton("Pokaż Cechy Zaznaczonego");
-        btnPokazCechy.addActionListener(e -> pokazCechyZaznaczonegoPojazdu());
-        panelPrzyciskow.add(btnPokazCechy);
-
-        JButton btnOdswiez = new JButton("Odśwież");
-        btnOdswiez.addActionListener(e -> odswiezTabelePojazdow());
-        panelPrzyciskow.add(btnOdswiez);
-
-        add(panelPrzyciskow, BorderLayout.SOUTH);
-    }
-
-    public void odswiezTabelePojazdow() {
-        modelTabeli.setRowCount(0);
-        List<Pojazd> pojazdy = zarzadzanie.pobierzWszystkiePojazdy();
-        for (Pojazd p : pojazdy) {
-            String typPojazdu = "";
-            if (p instanceof Koparka) typPojazdu = "Koparka";
-            else if (p instanceof Wywrotka) typPojazdu = "Wywrotka";
-            else if (p instanceof Dzwig) typPojazdu = "Dźwig";
-            modelTabeli.addRow(new Object[]{
-                    p.getId(),
-                    p.getNazwaModelu(),
-                    p.getRokProdukcji(),
-                    p.isDostepny() ? "Tak" : "Nie",
-                    typPojazdu,
-                    String.format("%.2f", p.getDziennaStawka())
-            });
-        }
-    }
-
-    private void pokazCechyZaznaczonegoPojazdu() {
-        int wybranyWiersz = tabelaPojazdow.getSelectedRow();
-        if (wybranyWiersz == -1) {
-            JOptionPane.showMessageDialog(parentFrame, "Proszę zaznaczyć pojazd.", "Informacja", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-        int idPojazdu = (int) modelTabeli.getValueAt(wybranyWiersz, 0);
-        Optional<Pojazd> pojazOpt = zarzadzanie.znajdzPojazd(idPojazdu);
-        if (pojazOpt.isPresent()) {
-            Pojazd pojazd = pojazOpt.get();
-            StringBuilder cechy = new StringBuilder();
-            String typ = "";
-
-            cechy.append("Model: ").append(pojazd.getNazwaModelu()).append("\n");
-            cechy.append("Rok produkcji: ").append(pojazd.getRokProdukcji()).append("\n");
-            cechy.append("Stawka dzienna: ").append(String.format("%.2f", pojazd.getDziennaStawka())).append(" PLN\n");
-            cechy.append("-----------------------------\nCechy specyficzne:\n");
-
-            if (pojazd instanceof Koparka k) {
-                typ = "Koparka";
-                cechy.append("  Głębokość kopania: ").append(k.getGlebokoscKopania()).append(" m\n");
-                cechy.append("  Typ podwozia: ").append(k.getTypPodwozia());
-            } else if (pojazd instanceof Wywrotka w) {
-                typ = "Wywrotka";
-                cechy.append("  Ładowność: ").append(w.getLadownosc()).append(" t\n");
-                cechy.append("  Liczba osi: ").append(w.getLiczbaOsi());
-            } else if (pojazd instanceof Dzwig d) {
-                typ = "Dźwig";
-                cechy.append("  Maksymalny udźwig: ").append(d.getMaksymalnyUdzwig()).append(" t\n");
-                cechy.append("  Maks. wys. podnoszenia: ").append(d.getMaksymalnaWysokoscPodnoszenia()).append(" m");
-            } else {
-                typ = "Pojazd Ogólny";
-                cechy.append("  Brak zdefiniowanych cech specyficznych dla tego typu.");
+        // Panel listy pojazdów
+        JPanel panelListy = new JPanel(new BorderLayout());
+        panelListy.setBorder(BorderFactory.createTitledBorder("Lista Pojazdów"));
+        modelListyPojazdow = new DefaultListModel<>();
+        listaPojazdow = new JList<>(modelListyPojazdow);
+        listaPojazdow.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        listaPojazdow.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                aktualnieWybranyPojazd = listaPojazdow.getSelectedValue();
+                wyswietlDanePojazdu(aktualnieWybranyPojazd);
+                edytujButton.setEnabled(aktualnieWybranyPojazd != null);
+                usunButton.setEnabled(aktualnieWybranyPojazd != null);
+                typPojazduComboBox.setEnabled(aktualnieWybranyPojazd == null);
             }
-            JTextArea textArea = new JTextArea(cechy.toString());
-            textArea.setEditable(false);
-            textArea.setWrapStyleWord(true);
-            textArea.setLineWrap(true);
-            textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
-            JScrollPane scrollPaneDialog = new JScrollPane(textArea);
-            scrollPaneDialog.setPreferredSize(new Dimension(400, 200));
-            JOptionPane.showMessageDialog(parentFrame, scrollPaneDialog, "Szczegóły Pojazdu: " + typ, JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(parentFrame, "Nie znaleziono pojazdu o ID: " + idPojazdu, "Błąd", JOptionPane.ERROR_MESSAGE);
-        }
-    }
+        });
+        panelListy.add(new JScrollPane(listaPojazdow), BorderLayout.CENTER);
 
-    private void dodajPojazdDialog() {
-        String[] typyPojazdow = {"Koparka", "Wywrotka", "Dźwig"};
-        String wybranyTyp = (String) JOptionPane.showInputDialog(
-                parentFrame,
-                "Wybierz typ pojazdu:",
-                "Dodaj Nowy Pojazd - Wybór Typu",
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                typyPojazdow,
-                typyPojazdow[0]);
-
-        if (wybranyTyp == null) {
-            return;
-        }
-
-        JPanel formPanel = new JPanel(new GridBagLayout());
+        // Główny panel formularza
+        JPanel panelFormularzaGlownego = new JPanel(new GridBagLayout());
+        panelFormularzaGlownego.setBorder(BorderFactory.createTitledBorder("Dane Pojazdu"));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.WEST;
 
-        JTextField modelField = new JTextField(20);
-        JTextField rokField = new JTextField(5);
-        JTextField stawkaField = new JTextField(7);
 
-        gbc.gridx = 0; gbc.gridy = 0; formPanel.add(new JLabel("Model:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
-        formPanel.add(modelField, gbc);
-        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
-
-        gbc.gridx = 0; gbc.gridy = 1; formPanel.add(new JLabel("Rok produkcji:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 1; formPanel.add(rokField, gbc);
-
-        JTextField spec1Field = new JTextField(10);
-        JTextField spec2Field = new JTextField(10);
-        String spec1Label = "", spec2Label = "";
-
-        if ("Koparka".equals(wybranyTyp)) {
-            spec1Label = "Głęb. kopania (m):"; spec2Label = "Typ podwozia:";
-        } else if ("Wywrotka".equals(wybranyTyp)) {
-            spec1Label = "Ładowność (t):"; spec2Label = "Liczba osi:";
-        } else if ("Dźwig".equals(wybranyTyp)) {
-            spec1Label = "Maks. udźwig (t):"; spec2Label = "Maks. wys. podn. (m):";
-        }
-
-        gbc.gridx = 0; gbc.gridy = 2; formPanel.add(new JLabel(spec1Label), gbc);
-        gbc.gridx = 1; gbc.gridy = 2; formPanel.add(spec1Field, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 3; formPanel.add(new JLabel(spec2Label), gbc);
-        gbc.gridx = 1; gbc.gridy = 3; formPanel.add(spec2Field, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 4; formPanel.add(new JLabel("Stawka dzienna (PLN):"), gbc);
-        gbc.gridx = 1; gbc.gridy = 4; formPanel.add(stawkaField, gbc);
-
-        int result = JOptionPane.showConfirmDialog(parentFrame, formPanel, "Dodaj " + wybranyTyp, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-
-        if (result == JOptionPane.OK_OPTION) {
-            try {
-                String model = modelField.getText().trim();
-                String rokStr = rokField.getText().trim();
-                String spec1Str = spec1Field.getText().trim();
-                String spec2Str = spec2Field.getText().trim();
-                String stawkaStr = stawkaField.getText().trim();
-
-                if (model.isEmpty() || rokStr.isEmpty() || spec1Str.isEmpty() || spec2Str.isEmpty() || stawkaStr.isEmpty()) {
-                    JOptionPane.showMessageDialog(parentFrame, "Wszystkie pola muszą być wypełnione!", "Błąd Walidacji", JOptionPane.ERROR_MESSAGE);
-                    return;
+        // Typ pojazdu
+        gbc.gridx = 0; gbc.gridy = 0;
+        panelFormularzaGlownego.add(new JLabel("Typ pojazdu:"), gbc);
+        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0;
+        typPojazduComboBox = new JComboBox<>(new String[]{"Koparka", "Dźwig", "Wywrotka"});
+        typPojazduComboBox.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                aktualizujWidocznoscPaneliAtrybutow();
+                // Jeśli pola są czyszczone (nie ma wybranego pojazdu), wyczyść też pola atrybutów
+                if (aktualnieWybranyPojazd == null) {
+                    wyczyscPolaAtrybutowSpecyficznych();
                 }
-
-                int rok = Integer.parseInt(rokStr);
-                if (rok < 1900 || rok > java.time.LocalDate.now().getYear() + 5) {
-                    JOptionPane.showMessageDialog(parentFrame, "Niepoprawny rok produkcji.", "Błąd Walidacji", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                double dziennaStawka = Double.parseDouble(stawkaStr.replace(',', '.'));
-                if (dziennaStawka <= 0) {
-                    JOptionPane.showMessageDialog(parentFrame, "Stawka dzienna musi być wartością dodatnią.", "Błąd Walidacji", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                Pojazd nowyPojazd = null;
-                int noweId = zarzadzanie.pobierzNastepneIdPojazdu();
-
-                if ("Koparka".equals(wybranyTyp)) {
-                    double glebokosc = Double.parseDouble(spec1Str.replace(',', '.'));
-                    if (glebokosc <= 0) throw new NumberFormatException("Głębokość kopania musi być dodatnia.");
-                    nowyPojazd = new Koparka(noweId, model, rok, glebokosc, spec2Str, dziennaStawka);
-                } else if ("Wywrotka".equals(wybranyTyp)) {
-                    double ladownosc = Double.parseDouble(spec1Str.replace(',', '.'));
-                    if (ladownosc <= 0) throw new NumberFormatException("Ładowność musi być dodatnia.");
-                    int osie = Integer.parseInt(spec2Str);
-                    if (osie <= 0) throw new NumberFormatException("Liczba osi musi być dodatnia.");
-                    nowyPojazd = new Wywrotka(noweId, model, rok, ladownosc, osie, dziennaStawka);
-                } else if ("Dźwig".equals(wybranyTyp)) {
-                    double udzwig = Double.parseDouble(spec1Str.replace(',', '.'));
-                    if (udzwig <= 0) throw new NumberFormatException("Udźwig musi być dodatni.");
-                    double wysokosc = Double.parseDouble(spec2Str.replace(',', '.'));
-                    if (wysokosc <= 0) throw new NumberFormatException("Wysokość podnoszenia musi być dodatnia.");
-                    nowyPojazd = new Dzwig(noweId, model, rok, udzwig, wysokosc, dziennaStawka);
-                }
-
-                if (nowyPojazd != null) {
-                    zarzadzanie.dodajPojazd(nowyPojazd);
-                    odswiezTabelePojazdow();
-                    JOptionPane.showMessageDialog(parentFrame, wybranyTyp + " \"" + model + "\" dodany pomyślnie!", "Sukces", JOptionPane.INFORMATION_MESSAGE);
-                }
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(parentFrame, "Błąd formatu danych: " + ex.getMessage() + "\nUpewnij się, że wprowadzasz poprawne liczby.", "Błąd Walidacji", JOptionPane.ERROR_MESSAGE);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(parentFrame, "Wystąpił nieoczekiwany błąd: " + ex.getMessage(), "Błąd Krytyczny", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
             }
+        });
+        panelFormularzaGlownego.add(typPojazduComboBox, gbc);
+        gbc.weightx = 0;
+
+        // Marka
+        gbc.gridx = 0; gbc.gridy = 1;
+        panelFormularzaGlownego.add(new JLabel("Marka:"), gbc);
+        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0;
+        markaField = new JTextField(20);
+        panelFormularzaGlownego.add(markaField, gbc);
+        gbc.weightx = 0;
+
+        // Model
+        gbc.gridx = 0; gbc.gridy = 2;
+        panelFormularzaGlownego.add(new JLabel("Model:"), gbc);
+        gbc.gridx = 1; gbc.gridy = 2; gbc.weightx = 1.0;
+        modelField = new JTextField(20);
+        panelFormularzaGlownego.add(modelField, gbc);
+        gbc.weightx = 0;
+
+        // Numer rejestracyjny
+        gbc.gridx = 0; gbc.gridy = 3;
+        panelFormularzaGlownego.add(new JLabel("Nr rejestracyjny:"), gbc);
+        gbc.gridx = 1; gbc.gridy = 3; gbc.weightx = 1.0;
+        numerRejestracyjnyField = new JTextField(20);
+        panelFormularzaGlownego.add(numerRejestracyjnyField, gbc);
+        gbc.weightx = 0;
+
+        // Cena za dobę
+        gbc.gridx = 0; gbc.gridy = 4;
+        panelFormularzaGlownego.add(new JLabel("Cena za dobę:"), gbc);
+        gbc.gridx = 1; gbc.gridy = 4; gbc.weightx = 1.0;
+        cenaZaDobeField = new JTextField(20);
+        panelFormularzaGlownego.add(cenaZaDobeField, gbc);
+        gbc.weightx = 0;
+
+        // Kontener na panele atrybutów specyficznych
+        panelAtrybutowSpecyficznychHolder = new JPanel(new CardLayout());
+        gbc.gridx = 0; gbc.gridy = 5; gbc.gridwidth = 2; gbc.weighty = 1.0; // Dajemy mu trochę miejsca
+        panelFormularzaGlownego.add(panelAtrybutowSpecyficznychHolder, gbc);
+        gbc.gridwidth = 1; gbc.weighty = 0; // Reset
+
+        // Inicjalizacja paneli atrybutów
+        initPanelAtrybutowKoparki();
+        initPanelAtrybutowDzwigu();
+        initPanelAtrybutowWywrotki();
+
+        panelAtrybutowSpecyficznychHolder.add(panelAtrybutowKoparki, "Koparka");
+        panelAtrybutowSpecyficznychHolder.add(panelAtrybutowDzwigu, "Dźwig");
+        panelAtrybutowSpecyficznychHolder.add(panelAtrybutowWywrotki, "Wywrotka");
+        // Dodajemy pusty panel jako domyślny, gdyby żaden typ nie był wybrany lub dla innych przypadków
+        panelAtrybutowSpecyficznychHolder.add(new JPanel(), "Pusty");
+
+
+        // Panel przycisków
+        JPanel panelPrzyciskow = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        dodajButton = new JButton("Dodaj");
+        edytujButton = new JButton("Edytuj");
+        usunButton = new JButton("Usuń");
+        wyczyscPolaButton = new JButton("Wyczyść Pola");
+
+        edytujButton.setEnabled(false);
+        usunButton.setEnabled(false);
+
+        panelPrzyciskow.add(dodajButton);
+        panelPrzyciskow.add(edytujButton);
+        panelPrzyciskow.add(usunButton);
+        panelPrzyciskow.add(wyczyscPolaButton);
+
+        gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 2; gbc.fill = GridBagConstraints.NONE; gbc.anchor = GridBagConstraints.CENTER;
+        panelFormularzaGlownego.add(panelPrzyciskow, gbc);
+
+        // Używamy JScrollPane dla panelu formularza, gdyby miał za dużo pól
+        JScrollPane scrollPaneFormularza = new JScrollPane(panelFormularzaGlownego);
+        scrollPaneFormularza.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPaneFormularza.setBorder(null); // Usuwamy podwójne obramowanie
+
+
+        add(panelListy, BorderLayout.CENTER);
+        add(scrollPaneFormularza, BorderLayout.SOUTH); // Zmienione na scrollPane
+
+        // Listenery przycisków
+        dodajButton.addActionListener(e -> dodajPojazd());
+        edytujButton.addActionListener(e -> edytujPojazd());
+        usunButton.addActionListener(e -> usunPojazd());
+        wyczyscPolaButton.addActionListener(e -> {
+            wyczyscPola();
+            listaPojazdow.clearSelection();
+            aktualnieWybranyPojazd = null;
+            edytujButton.setEnabled(false);
+            usunButton.setEnabled(false);
+            typPojazduComboBox.setEnabled(true);
+            aktualizujWidocznoscPaneliAtrybutow(); // Pokaż odpowiedni panel dla domyślnego typu
+        });
+    }
+
+    private void initPanelAtrybutowKoparki() {
+        panelAtrybutowKoparki = new JPanel(new GridBagLayout());
+        panelAtrybutowKoparki.setBorder(BorderFactory.createTitledBorder("Atrybuty Koparki"));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(3, 3, 3, 3);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
+
+        gbc.gridx = 0; gbc.gridy = 0; panelAtrybutowKoparki.add(new JLabel("Głębokość kopania (m):"), gbc);
+        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0; koparkaGlebokoscField = new JTextField(10); panelAtrybutowKoparki.add(koparkaGlebokoscField, gbc); gbc.weightx = 0;
+
+        gbc.gridx = 0; gbc.gridy = 1; panelAtrybutowKoparki.add(new JLabel("Pojemność łyżki (m³):"), gbc);
+        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0; koparkaPojemnoscLyzeczkiField = new JTextField(10); panelAtrybutowKoparki.add(koparkaPojemnoscLyzeczkiField, gbc); gbc.weightx = 0;
+
+        gbc.gridx = 0; gbc.gridy = 2; panelAtrybutowKoparki.add(new JLabel("Zasięg ramienia (m):"), gbc);
+        gbc.gridx = 1; gbc.gridy = 2; gbc.weightx = 1.0; koparkaZasiegRamieniaField = new JTextField(10); panelAtrybutowKoparki.add(koparkaZasiegRamieniaField, gbc); gbc.weightx = 0;
+    }
+
+    private void initPanelAtrybutowDzwigu() {
+        panelAtrybutowDzwigu = new JPanel(new GridBagLayout());
+        panelAtrybutowDzwigu.setBorder(BorderFactory.createTitledBorder("Atrybuty Dźwigu"));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(3, 3, 3, 3);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
+
+        gbc.gridx = 0; gbc.gridy = 0; panelAtrybutowDzwigu.add(new JLabel("Maks. udźwig (tony):"), gbc);
+        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0; dzwigUdzwigField = new JTextField(10); panelAtrybutowDzwigu.add(dzwigUdzwigField, gbc); gbc.weightx = 0;
+
+        gbc.gridx = 0; gbc.gridy = 1; panelAtrybutowDzwigu.add(new JLabel("Długość wysięgnika (m):"), gbc);
+        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0; dzwigDlugoscWysiegnikaField = new JTextField(10); panelAtrybutowDzwigu.add(dzwigDlugoscWysiegnikaField, gbc); gbc.weightx = 0;
+
+        gbc.gridx = 0; gbc.gridy = 2; panelAtrybutowDzwigu.add(new JLabel("Maks. wys. podnoszenia (m):"), gbc);
+        gbc.gridx = 1; gbc.gridy = 2; gbc.weightx = 1.0; dzwigWysokoscPodnoszeniaField = new JTextField(10); panelAtrybutowDzwigu.add(dzwigWysokoscPodnoszeniaField, gbc); gbc.weightx = 0;
+    }
+
+    private void initPanelAtrybutowWywrotki() {
+        panelAtrybutowWywrotki = new JPanel(new GridBagLayout());
+        panelAtrybutowWywrotki.setBorder(BorderFactory.createTitledBorder("Atrybuty Wywrotki"));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(3, 3, 3, 3);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
+
+        gbc.gridx = 0; gbc.gridy = 0; panelAtrybutowWywrotki.add(new JLabel("Ładowność (tony):"), gbc);
+        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0; wywrotkaLadownoscField = new JTextField(10); panelAtrybutowWywrotki.add(wywrotkaLadownoscField, gbc); gbc.weightx = 0;
+
+        gbc.gridx = 0; gbc.gridy = 1; panelAtrybutowWywrotki.add(new JLabel("Typ napędu:"), gbc);
+        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0; wywrotkaTypNapeduField = new JTextField(10); panelAtrybutowWywrotki.add(wywrotkaTypNapeduField, gbc); gbc.weightx = 0;
+
+        gbc.gridx = 0; gbc.gridy = 2; panelAtrybutowWywrotki.add(new JLabel("Pojemność skrzyni (m³):"), gbc);
+        gbc.gridx = 1; gbc.gridy = 2; gbc.weightx = 1.0; wywrotkaPojemnoscSkrzyniField = new JTextField(10); panelAtrybutowWywrotki.add(wywrotkaPojemnoscSkrzyniField, gbc); gbc.weightx = 0;
+    }
+
+
+    /**
+     * Aktualizuje widoczność paneli z atrybutami specyficznymi
+     * w zależności od wybranego typu pojazdu, używając CardLayout.
+     */
+    private void aktualizujWidocznoscPaneliAtrybutow() {
+        String typ = (String) typPojazduComboBox.getSelectedItem();
+        CardLayout cl = (CardLayout)(panelAtrybutowSpecyficznychHolder.getLayout());
+        if (typ == null) {
+            cl.show(panelAtrybutowSpecyficznychHolder, "Pusty");
+            return;
+        }
+        cl.show(panelAtrybutowSpecyficznychHolder, typ); // Nazwy kart muszą odpowiadać nazwom typów
+    }
+
+
+    /**
+     * Ładuje listę pojazdów z logiki biznesowej do modelu listy GUI.
+     */
+    private void zaladujPojazdy() {
+        modelListyPojazdow.clear();
+        for (Pojazd p : zarzadzanie.getPojazdy()) {
+            modelListyPojazdow.addElement(p);
         }
     }
 
-    private void usunZaznaczonyPojazd() {
-        int wybranyWiersz = tabelaPojazdow.getSelectedRow();
-        if (wybranyWiersz == -1) {
-            JOptionPane.showMessageDialog(parentFrame, "Proszę zaznaczyć pojazd do usunięcia.", "Informacja", JOptionPane.INFORMATION_MESSAGE);
+    /**
+     * Wyświetla dane wybranego pojazdu w polach formularza.
+     * @param pojazd Pojazd, którego dane mają być wyświetlone. Jeśli null, pola są czyszczone.
+     */
+    private void wyswietlDanePojazdu(Pojazd pojazd) {
+        wyczyscPolaAtrybutowSpecyficznych(); // Najpierw czyścimy wszystkie specyficzne
+        if (pojazd != null) {
+            typPojazduComboBox.setSelectedItem(pojazd.getTyp());
+            markaField.setText(pojazd.getMarka());
+            modelField.setText(pojazd.getModel());
+            numerRejestracyjnyField.setText(pojazd.getNumerRejestracyjny());
+            cenaZaDobeField.setText(String.valueOf(pojazd.getCenaZaDobe()));
+
+            // Ustawienie atrybutów specyficznych
+            if (pojazd instanceof Koparka k) {
+                koparkaGlebokoscField.setText(String.valueOf(k.getGlebokoscKopania_m()));
+                koparkaPojemnoscLyzeczkiField.setText(String.valueOf(k.getPojemnoscLyzeczki_m3()));
+                koparkaZasiegRamieniaField.setText(String.valueOf(k.getZasiegRamienia_m()));
+            } else if (pojazd instanceof Dzwig d) {
+                dzwigUdzwigField.setText(String.valueOf(d.getMaksymalnyUdzwig_tony()));
+                dzwigDlugoscWysiegnikaField.setText(String.valueOf(d.getDlugoscWysiegnika_m()));
+                dzwigWysokoscPodnoszeniaField.setText(String.valueOf(d.getMaksymalnaWysokoscPodnoszenia_m()));
+            } else if (pojazd instanceof Wywrotka w) {
+                wywrotkaLadownoscField.setText(String.valueOf(w.getLadownosc_tony()));
+                wywrotkaTypNapeduField.setText(w.getTypNapedu());
+                wywrotkaPojemnoscSkrzyniField.setText(String.valueOf(w.getPojemnoscSkrzyni_m3()));
+            }
+            aktualizujWidocznoscPaneliAtrybutow();
+            typPojazduComboBox.setEnabled(false);
+        } else {
+            wyczyscPola(); // Czyści też pola ogólne
+            typPojazduComboBox.setEnabled(true);
+        }
+    }
+    
+    /**
+     * Czyści tylko pola atrybutów specyficznych.
+     */
+    private void wyczyscPolaAtrybutowSpecyficznych() {
+        koparkaGlebokoscField.setText("");
+        koparkaPojemnoscLyzeczkiField.setText("");
+        koparkaZasiegRamieniaField.setText("");
+        dzwigUdzwigField.setText("");
+        dzwigDlugoscWysiegnikaField.setText("");
+        dzwigWysokoscPodnoszeniaField.setText("");
+        wywrotkaLadownoscField.setText("");
+        wywrotkaTypNapeduField.setText("");
+        wywrotkaPojemnoscSkrzyniField.setText("");
+    }
+
+
+    /**
+     * Czyści wszystkie pola formularza (ogólne i specyficzne).
+     */
+    private void wyczyscPola() {
+        typPojazduComboBox.setSelectedIndex(0);
+        markaField.setText("");
+        modelField.setText("");
+        numerRejestracyjnyField.setText("");
+        cenaZaDobeField.setText("");
+        wyczyscPolaAtrybutowSpecyficznych(); // Czyści pola specyficzne
+        aktualizujWidocznoscPaneliAtrybutow(); // Ustawia odpowiedni panel dla domyślnego typu
+        markaField.requestFocus();
+        typPojazduComboBox.setEnabled(true);
+    }
+
+    /**
+     * Waliduje i parsuje wartość double z pola tekstowego.
+     * @param field Pole tekstowe.
+     * @param fieldName Nazwa pola (do komunikatu błędu).
+     * @param errors Lista do zbierania błędów walidacji.
+     * @return Sparsowana wartość double lub 0.0 jeśli błąd.
+     */
+    private double parseDoubleField(JTextField field, String fieldName, List<String> errors) {
+        try {
+            double value = Double.parseDouble(field.getText().trim());
+            if (value <= 0) {
+                errors.add(fieldName + " musi być wartością dodatnią.");
+                return 0.0;
+            }
+            return value;
+        } catch (NumberFormatException ex) {
+            errors.add(fieldName + " musi być poprawną liczbą.");
+            return 0.0;
+        }
+    }
+    
+    /**
+     * Waliduje, czy pole tekstowe (dla wartości String) nie jest puste.
+     * @param field Pole tekstowe.
+     * @param fieldName Nazwa pola (do komunikatu błędu).
+     * @param errors Lista do zbierania błędów walidacji.
+     * @return Wartość z pola lub pusty string jeśli błąd (choć błąd jest dodawany do listy).
+     */
+    private String validateStringField(JTextField field, String fieldName, List<String> errors) {
+        String value = field.getText().trim();
+        if (value.isEmpty()) {
+            errors.add(fieldName + " jest wymagane.");
+        }
+        return value;
+    }
+
+
+    /**
+     * Obsługuje logikę dodawania nowego pojazdu.
+     */
+    private void dodajPojazd() {
+        String typ = (String) typPojazduComboBox.getSelectedItem();
+        List<String> validationErrors = new ArrayList<>();
+
+        String marka = validateStringField(markaField, "Marka", validationErrors);
+        String model = validateStringField(modelField, "Model", validationErrors);
+        String numerRejestracyjny = validateStringField(numerRejestracyjnyField, "Numer rejestracyjny", validationErrors);
+        double cenaZaDobe = parseDoubleField(cenaZaDobeField, "Cena za dobę", validationErrors);
+
+        Pojazd nowyPojazd = null;
+
+        switch (typ) {
+            case "Koparka":
+                double glebokosc = parseDoubleField(koparkaGlebokoscField, "Głębokość kopania", validationErrors);
+                double pojemnoscLyzki = parseDoubleField(koparkaPojemnoscLyzeczkiField, "Pojemność łyżki", validationErrors);
+                double zasiegRamienia = parseDoubleField(koparkaZasiegRamieniaField, "Zasięg ramienia", validationErrors);
+                if (validationErrors.isEmpty()) {
+                    nowyPojazd = new Koparka(marka, model, numerRejestracyjny, cenaZaDobe, glebokosc, pojemnoscLyzki, zasiegRamienia);
+                }
+                break;
+            case "Dźwig":
+                double udzwig = parseDoubleField(dzwigUdzwigField, "Maksymalny udźwig", validationErrors);
+                double dlugoscWysiegnika = parseDoubleField(dzwigDlugoscWysiegnikaField, "Długość wysięgnika", validationErrors);
+                double wysPodnoszenia = parseDoubleField(dzwigWysokoscPodnoszeniaField, "Maks. wys. podnoszenia", validationErrors);
+                if (validationErrors.isEmpty()) {
+                    nowyPojazd = new Dzwig(marka, model, numerRejestracyjny, cenaZaDobe, udzwig, dlugoscWysiegnika, wysPodnoszenia);
+                }
+                break;
+            case "Wywrotka":
+                double ladownosc = parseDoubleField(wywrotkaLadownoscField, "Ładowność", validationErrors);
+                String typNapedu = validateStringField(wywrotkaTypNapeduField, "Typ napędu", validationErrors);
+                double pojemnoscSkrzyni = parseDoubleField(wywrotkaPojemnoscSkrzyniField, "Pojemność skrzyni", validationErrors);
+                if (validationErrors.isEmpty()) {
+                    nowyPojazd = new Wywrotka(marka, model, numerRejestracyjny, cenaZaDobe, ladownosc, typNapedu, pojemnoscSkrzyni);
+                }
+                break;
+            default:
+                JOptionPane.showMessageDialog(this, "Nieznany typ pojazdu.", "Błąd", JOptionPane.ERROR_MESSAGE);
+                return;
+        }
+
+        if (!validationErrors.isEmpty()) {
+            JOptionPane.showMessageDialog(this, String.join("\n", validationErrors), "Błędy walidacji", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        int idPojazdu = (int) modelTabeli.getValueAt(wybranyWiersz, 0);
-        String modelPojazdu = (String) modelTabeli.getValueAt(wybranyWiersz, 1);
 
-        Optional<Pojazd> pojazdOpt = zarzadzanie.znajdzPojazd(idPojazdu);
-        if (pojazdOpt.isEmpty()) {
-            JOptionPane.showMessageDialog(parentFrame, "Błąd: Wybrany pojazd nie istnieje już w systemie.", "Błąd", JOptionPane.ERROR_MESSAGE);
-            odswiezTabelePojazdow();
+        if (nowyPojazd != null) {
+            zarzadzanie.dodajPojazd(nowyPojazd);
+            zaladujPojazdy();
+            wyczyscPola();
+            JOptionPane.showMessageDialog(this, "Pojazd dodany pomyślnie.", "Sukces", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    /**
+     * Obsługuje logikę edycji wybranego pojazdu.
+     */
+    private void edytujPojazd() {
+        if (aktualnieWybranyPojazd == null) {
+            JOptionPane.showMessageDialog(this, "Najpierw wybierz pojazd z listy.", "Błąd", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        int potwierdzenie = JOptionPane.showConfirmDialog(
-                parentFrame,
-                "Czy na pewno chcesz usunąć pojazd: " + modelPojazdu + " (ID: " + idPojazdu + ")?",
-                "Potwierdź Usunięcie",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE);
+        List<String> validationErrors = new ArrayList<>();
+        String marka = validateStringField(markaField, "Marka", validationErrors);
+        String modelP = validateStringField(modelField, "Model", validationErrors); // 'model' to już nazwa pola
+        String numerRejestracyjny = validateStringField(numerRejestracyjnyField, "Numer rejestracyjny", validationErrors);
+        double cenaZaDobe = parseDoubleField(cenaZaDobeField, "Cena za dobę", validationErrors);
+
+        // Aktualizacja danych ogólnych
+        aktualnieWybranyPojazd.setMarka(marka);
+        aktualnieWybranyPojazd.setModel(modelP);
+        aktualnieWybranyPojazd.setNumerRejestracyjny(numerRejestracyjny);
+        aktualnieWybranyPojazd.setCenaZaDobe(cenaZaDobe);
+
+        // Aktualizacja danych specyficznych
+        String typ = aktualnieWybranyPojazd.getTyp(); // Typ nie jest zmieniany podczas edycji
+        switch (typ) {
+            case "Koparka":
+                Koparka k = (Koparka) aktualnieWybranyPojazd;
+                k.setGlebokoscKopania_m(parseDoubleField(koparkaGlebokoscField, "Głębokość kopania", validationErrors));
+                k.setPojemnoscLyzeczki_m3(parseDoubleField(koparkaPojemnoscLyzeczkiField, "Pojemność łyżki", validationErrors));
+                k.setZasiegRamienia_m(parseDoubleField(koparkaZasiegRamieniaField, "Zasięg ramienia", validationErrors));
+                break;
+            case "Dźwig":
+                Dzwig d = (Dzwig) aktualnieWybranyPojazd;
+                d.setMaksymalnyUdzwig_tony(parseDoubleField(dzwigUdzwigField, "Maksymalny udźwig", validationErrors));
+                d.setDlugoscWysiegnika_m(parseDoubleField(dzwigDlugoscWysiegnikaField, "Długość wysięgnika", validationErrors));
+                d.setMaksymalnaWysokoscPodnoszenia_m(parseDoubleField(dzwigWysokoscPodnoszeniaField, "Maks. wys. podnoszenia", validationErrors));
+                break;
+            case "Wywrotka":
+                Wywrotka w = (Wywrotka) aktualnieWybranyPojazd;
+                w.setLadownosc_tony(parseDoubleField(wywrotkaLadownoscField, "Ładowność", validationErrors));
+                w.setTypNapedu(validateStringField(wywrotkaTypNapeduField, "Typ napędu", validationErrors));
+                w.setPojemnoscSkrzyni_m3(parseDoubleField(wywrotkaPojemnoscSkrzyniField, "Pojemność skrzyni", validationErrors));
+                break;
+        }
+
+        if (!validationErrors.isEmpty()) {
+            // Przywrócenie oryginalnych wartości, jeśli walidacja nie powiodła się,
+            // aby użytkownik widział, co próbował zapisać.
+            // Jednak lepszym podejściem byłoby nie zatwierdzanie zmian w obiekcie, dopóki walidacja nie przejdzie.
+            // Na razie zostawiamy tak, ale to miejsce do potencjalnej poprawy.
+            // Można by np. najpierw zebrać wszystkie wartości, potem walidować, a dopiero potem ustawiać w obiekcie.
+            wyswietlDanePojazdu(aktualnieWybranyPojazd); // Przywraca poprzednie dane w polach, jeśli obiekt nie został zmieniony
+            JOptionPane.showMessageDialog(this, String.join("\n", validationErrors), "Błędy walidacji", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        zaladujPojazdy();
+        listaPojazdow.setSelectedValue(aktualnieWybranyPojazd, true);
+        JOptionPane.showMessageDialog(this, "Dane pojazdu zaktualizowane.", "Sukces", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+
+    /**
+     * Obsługuje logikę usuwania wybranego pojazdu.
+     */
+    private void usunPojazd() {
+        if (aktualnieWybranyPojazd == null) {
+            JOptionPane.showMessageDialog(this, "Najpierw wybierz pojazd z listy.", "Błąd", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        boolean czyWypozyczony = zarzadzanie.getAktualneWypozyczenia().stream()
+                .anyMatch(w -> w.getPojazd().equals(aktualnieWybranyPojazd));
+
+        if (czyWypozyczony) {
+            JOptionPane.showMessageDialog(this, "Nie można usunąć pojazdu, który jest aktualnie wypożyczony.", "Błąd usuwania", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        boolean maHistorieWypozyczen = zarzadzanie.getHistoryczneWypozyczenia().stream()
+                .anyMatch(w -> w.getPojazd().equals(aktualnieWybranyPojazd));
+        
+        if (maHistorieWypozyczen) {
+             int potwierdzenieHistorii = JOptionPane.showConfirmDialog(this,
+                "Pojazd '" + aktualnieWybranyPojazd.toString() + "' ma historię wypożyczeń.\n" +
+                "Usunięcie pojazdu usunie go również z historii wypożyczeń.\n" +
+                "Czy na pewno chcesz kontynuować?",
+                "Potwierdź usunięcie pojazdu z historią", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+             if (potwierdzenieHistorii != JOptionPane.YES_OPTION) {
+                 return;
+             }
+        }
+
+        int potwierdzenie = JOptionPane.showConfirmDialog(this,
+                "Czy na pewno chcesz usunąć pojazd: " + aktualnieWybranyPojazd.toString() + "?",
+                "Potwierdź usunięcie", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
         if (potwierdzenie == JOptionPane.YES_OPTION) {
-            if (zarzadzanie.usunPojazd(idPojazdu)) {
-                JOptionPane.showMessageDialog(parentFrame, "Pojazd \"" + modelPojazdu + "\" usunięty pomyślnie.", "Sukces", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(parentFrame, "Nie udało się usunąć pojazdu \"" + modelPojazdu + "\".\nMożliwe przyczyny: pojazd jest aktualnie wypożyczony.", "Błąd Usuwania", JOptionPane.ERROR_MESSAGE);
-            }
-            odswiezTabelePojazdow();
-            if (parentFrame instanceof OknoGlowne) {
-                ((OknoGlowne)parentFrame).odswiezWszystkiePanele();
-            }
+            zarzadzanie.usunPojazd(aktualnieWybranyPojazd);
+            zaladujPojazdy();
+            wyczyscPola();
+            aktualnieWybranyPojazd = null;
+            edytujButton.setEnabled(false);
+            usunButton.setEnabled(false);
+            typPojazduComboBox.setEnabled(true);
+            JOptionPane.showMessageDialog(this, "Pojazd usunięty.", "Sukces", JOptionPane.INFORMATION_MESSAGE);
         }
+    }
+    
+    /**
+     * Metoda publiczna do odświeżania listy pojazdów z zewnątrz.
+     */
+    public void odswiezListePojazdow() {
+        zaladujPojazdy();
     }
 }

@@ -1,52 +1,97 @@
-package serwiswypozyczalnimaszyn.model; // <--- ZMIANA TUTAJ
+package serwiswypozyczalnimaszyn.model;
 
 /**
- * Klasa Wywrotka dziedzicząca po klasie Pojazd.
- * Reprezentuje specyficzny typ pojazdu budowlanego - wywrotkę.
+ * Klasa reprezentująca Wywrotkę, dziedzicząca po klasie Pojazd.
+ * Specyficzne atrybuty dla wywrotki to ładowność, typ napędu i pojemność skrzyni.
  */
 public class Wywrotka extends Pojazd {
+    private static final long serialVersionUID = 2L; // Zmieniona wersja serializacji
 
-    private double ladownosc; 
-    private int liczbaOsi;
-    private double dziennaStawka;
+    private double ladownosc_tony; // Ładowność wywrotki w tonach
+    private String typNapedu; // Typ napędu (np. 4x2, 6x4, 8x4)
+    private double pojemnoscSkrzyni_m3; // Pojemność skrzyni ładunkowej w metrach sześciennych
 
-    public Wywrotka(int id, String nazwaModelu, int rokProdukcji, double ladownosc, int liczbaOsi, double dziennaStawka) {
-        super(id, nazwaModelu, rokProdukcji); 
-        this.ladownosc = ladownosc;
-        this.liczbaOsi = liczbaOsi;
-        this.dziennaStawka = dziennaStawka;
+    /**
+     * Konstruktor klasy Wywrotka.
+     *
+     * @param marka Marka wywrotki.
+     * @param model Model wywrotki.
+     * @param numerRejestracyjny Numer rejestracyjny wywrotki.
+     * @param cenaZaDobe Cena wynajmu wywrotki za dobę.
+     * @param ladownosc_tony Ładowność wywrotki w tonach.
+     * @param typNapedu Typ napędu wywrotki.
+     * @param pojemnoscSkrzyni_m3 Pojemność skrzyni ładunkowej w m^3.
+     */
+    public Wywrotka(String marka, String model, String numerRejestracyjny, double cenaZaDobe, double ladownosc_tony, String typNapedu, double pojemnoscSkrzyni_m3) {
+        super(marka, model, numerRejestracyjny, cenaZaDobe);
+        this.ladownosc_tony = ladownosc_tony;
+        this.typNapedu = typNapedu;
+        this.pojemnoscSkrzyni_m3 = pojemnoscSkrzyni_m3;
     }
 
-    public double getLadownosc() {
-        return ladownosc;
+    /**
+     * Zwraca ładowność wywrotki.
+     * @return Ładowność w tonach.
+     */
+    public double getLadownosc_tony() {
+        return ladownosc_tony;
     }
 
-    public void setLadownosc(double ladownosc) {
-        this.ladownosc = ladownosc;
+    /**
+     * Ustawia ładowność wywrotki.
+     * @param ladownosc_tony Nowa ładowność w tonach.
+     */
+    public void setLadownosc_tony(double ladownosc_tony) {
+        this.ladownosc_tony = ladownosc_tony;
     }
 
-    public int getLiczbaOsi() {
-        return liczbaOsi;
+    /**
+     * Zwraca typ napędu wywrotki.
+     * @return Typ napędu.
+     */
+    public String getTypNapedu() {
+        return typNapedu;
     }
 
-    public void setLiczbaOsi(int liczbaOsi) {
-        this.liczbaOsi = liczbaOsi;
+    /**
+     * Ustawia typ napędu wywrotki.
+     * @param typNapedu Nowy typ napędu.
+     */
+    public void setTypNapedu(String typNapedu) {
+        this.typNapedu = typNapedu;
     }
 
+    /**
+     * Zwraca pojemność skrzyni ładunkowej.
+     * @return Pojemność skrzyni w m^3.
+     */
+    public double getPojemnoscSkrzyni_m3() {
+        return pojemnoscSkrzyni_m3;
+    }
+
+    /**
+     * Ustawia pojemność skrzyni ładunkowej.
+     * @param pojemnoscSkrzyni_m3 Nowa pojemność skrzyni w m^3.
+     */
+    public void setPojemnoscSkrzyni_m3(double pojemnoscSkrzyni_m3) {
+        this.pojemnoscSkrzyni_m3 = pojemnoscSkrzyni_m3;
+    }
+
+    /**
+     * Zwraca typ pojazdu jako "Wywrotka".
+     * @return String "Wywrotka".
+     */
     @Override
-    public double getDziennaStawka() {
-        return dziennaStawka;
+    public String getTyp() {
+        return "Wywrotka";
     }
 
-    public void setDziennaStawka(double dziennaStawka) {
-        this.dziennaStawka = dziennaStawka;
-    }
-
+    /**
+     * Zwraca reprezentację tekstową obiektu Wywrotka, zawierającą również jej specyficzne atrybuty.
+     * @return String opisujący wywrotkę.
+     */
     @Override
-    public String wyswietlSzczegoly() {
-        return super.toString() +
-               ", Typ: Wywrotka" +
-               ", Ładowność: " + ladownosc + " t" +
-               ", Liczba osi: " + liczbaOsi;
+    public String toString() {
+        return super.toString() + " - Ładowność: " + ladownosc_tony + "t, Napęd: " + typNapedu + ", Skrzynia: " + pojemnoscSkrzyni_m3 + "m³";
     }
 }
